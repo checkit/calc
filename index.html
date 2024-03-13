@@ -3,77 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <title>Server Cost Calculator</title>
-    <script>
-        function calculateCosts() {
-            const rates = {
-                'CM': 170,
-                'JM': 80,
-                'LM': 40,
-                'Junior/International Moderators': 30
-            };
+<script>
+    function calculateCosts() {
+        const rates = {
+            'CM': 170,
+            'JM': 80,
+            'LM': 40,
+            'Junior/International Moderators': 30
+        };
 
-            let staffCounts = {
-                'CM': 1,
-                'JM': 1,
-                'LM': 1,
-                'Junior/International Moderators': 6
-            };
+        let staffCounts = {
+            'CM': 1,
+            'JM': 1,
+            'LM': 1,
+            'Junior/International Moderators': 6 // Base count for Junior/International Moderators
+        };
 
-            const packageCosts = {
-                'none': 0,
-                'basic': 25000,
-                'advanced': 50000,
-                'top-notch': 75000
-            };
+        const packageCosts = {
+            'none': 0,
+            'basic': 25000,
+            'advanced': 50000,
+            'top-notch': 75000
+        };
 
-            const serverSize = document.getElementById('serverSize').value;
-            const contentPackage = document.getElementById('contentPackage').value;
-            const engagementLevel = document.getElementById('engagement').value;
+        const serverSize = document.getElementById('serverSize').value;
+        const contentPackage = document.getElementById('contentPackage').value;
+        const engagementLevel = document.getElementById('engagement').value;
 
-            let membershipFactor, weeklyCost = 0;
-            switch (serverSize) {
-                case '25k':
-                    membershipFactor = 0.6667;
-                    staffCounts['LM'] = 0; // Adjust LM based on server size
-                    break;
-                case '50k':
-                    membershipFactor = 1;
-                    break;
-                case '75k':
-                    membershipFactor = 1.5;
-                    break;
-                case '100k':
-                    membershipFactor = 2;
-                    break;
-                default:
-                    membershipFactor = 1;
-            }
-
-            // Adjustments for engagement level
-            let engagementAdjustments = {
-                'low': 1,
-                'medium': 1.1, // Assuming a 10% increase for medium
-                'high': 1.25 // Assuming a 25% increase for high
-            };
-
-            let engagementFactor = engagementAdjustments[engagementLevel];
-
-            Object.keys(rates).forEach(role => {
-                let hours = 20; // Base hours for simplicity
-                weeklyCost += rates[role] * staffCounts[role] * hours * membershipFactor * engagementFactor;
-            });
-
-            const monthlyStaffCost = weeklyCost * 4;
-            const contentPackageCost = packageCosts[contentPackage];
-            const totalCost = monthlyStaffCost + contentPackageCost;
-
-            document.getElementById('weeklyStaffCost').innerText = `Weekly Staffing Cost: $${weeklyCost.toFixed(2)}`;
-            document.getElementById('monthlyStaffCost').innerText = `Total Monthly Staffing Cost: $${monthlyStaffCost.toFixed(2)}`;
-            document.getElementById('contentPackageCost').innerText = `Content Package Cost: $${contentPackageCost.toFixed(2)}`;
-            document.getElementById('totalCost').innerText = `Subtotal: $${totalCost.toFixed(2)}`;
-            document.getElementById('staffAllocation').innerText = `Staff Allocation: CM: ${staffCounts['CM']}, JM: ${staffCounts['JM']}, LM: ${staffCounts['LM']}, Junior/International Moderators: ${staffCounts['Junior/International Moderators']}`;
+        // Adjust staff counts based on server size
+        if (serverSize === '75k') {
+            staffCounts['Junior/International Moderators'] += 2; // Add 2 for 75k members
+        } else if (serverSize === '100k') {
+            staffCounts['Junior/International Moderators'] += 4; // Add 4 for 100k members
         }
-    </script>
+
+        // Adjust staff counts based on engagement level
+        if (engagementLevel === 'medium') {
+            staffCounts['Junior/International Moderators'] += 2; // Additional 2 for medium engagement
+        } else if (engagementLevel === 'high') {
+            staffCounts['Junior/International Moderators'] += 4; // Additional 4 for high engagement
+        }
+
+        let membershipFactor;
+        switch (serverSize) {
+            case '25k':
+                membershipFactor = 0.6667; // Decrease by 1.5
+                staffCounts['LM'] = 0; // Remove Lead Mod below 25k members
+                break;
+            case '50k':
+                membershipFactor = 1; // Base case
+                break;
+            case '75k':
+                membershipFactor = 1.5;
+                break;
+            case '100k':
+                membershipFactor = 2;
+                break;
+            default:
+                membershipFactor = 1; // Default to base case if something goes wrong
+        }
+
+        let weeklyCost = 0;
+        Object.keys(rates).forEach(role => {
+            let baseHours = 20; // Assuming 20 hours for simplicity
+            weeklyCost += rates[role] * staffCounts[role] * baseHours * membershipFactor; // Apply membership factor
+        });
+
+        const monthlyStaffCost = weeklyCost * 4; // Assuming 4 weeks per month
+        const contentPackageCost = packageCosts[contentPackage];
+        const totalCost = monthlyStaffCost + contentPackageCost;
+
+        document.getElementById('weeklyStaffCost').innerText = `Weekly Staffing Cost: $${weeklyCost.toFixed(2)}`;
+        document.getElementById('monthlyStaffCost').innerText = `Total Monthly Staffing Cost: $${monthlyStaffCost.toFixed(2)}`;
+        document.getElementById('contentPackageCost').innerText = `Content Package Cost: $${contentPackageCost.toFixed(2)}`;
+        document.getElementById('totalCost').innerText = `Subtotal: $${totalCost.toFixed(2)}`;
+        document.getElementById('staffAllocation').innerText = `Staff Allocation: CM: ${staffCounts['CM']}, JM: ${staffCounts['JM']}, LM: ${staffCounts['LM']}, Junior/International Moderators: ${staffCounts['Junior/International Moderators']}`;
+    }
+</script>
 </head>
 <body>
     <h1>Server Cost Calculator</h1>
