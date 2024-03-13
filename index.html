@@ -1,128 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <title>Server Cost and Staff Calculator</title>
-  <script>
-    function calculateCostsAndStaff() {
-      const rates = {
-        'CM': 170,
-        'JM': 80,
-        'LM': 40,
-        'Junior/International Moderators': 30
-      };
+    <meta charset="UTF-8">
+    <title>Server Cost Calculator</title>
+    <script>
+        function calculateCosts() {
+            // Hourly rates
+            const rates = {
+                'CM': 170,
+                'JM': 80,
+                'LM': 40,
+                'Junior/International Moderators': 30
+            };
 
-      // Base hours for a server with 50k members
-      const base_hours_50k = {
-        'CM': 15,
-        'JM': 10,
-        'LM': 10,
-        'Junior/International Moderators': 120 // 20 hours each for 6 moderators
-      };
+            // Staff counts for each role
+            const staffCounts = {
+                'CM': 1,
+                'JM': 1,
+                'LM': 1,
+                'Junior/International Moderators': 6 // Assumes 6 Junior/International Moderators
+            };
 
-      // Base staff for a server with 50k members
-      const base_staff_50k = {
-        'CM': 1,
-        'JM': 1,
-        'LM': 1,
-        'Junior/International Moderators': 6
-      };
+            // Content package costs
+            const packageCosts = {
+                'none': 0,
+                'basic': 25000,
+                'advanced': 50000,
+                'top-notch': 75000
+            };
 
-      const members = document.getElementById('members').value;
-      const engagement = document.getElementById('engagement').value;
+            const serverSize = document.getElementById('serverSize').value;
+            const contentPackage = document.getElementById('contentPackage').value;
 
-      // Adjust hours and staff numbers based on server size
-      let membership_factor;
-      switch (members) {
-        case '25000':
-          membership_factor = 2 / 3; // Decrease by 1.5 times from base 50k
-          break;
-        case '50000':
-          membership_factor = 1; // Base case
-          break;
-        case '75000':
-          membership_factor = 1.5; // Increase by 1.5 times from base 50k
-          break;
-        case '100000':
-          membership_factor = 2; // Double the base 50k
-          break;
-        default:
-          membership_factor = 1; // Default to base case if unexpected value
-      }
+            let membershipFactor, weeklyCost = 0;
+            switch (serverSize) {
+                case '25k':
+                    membershipFactor = 0.6667; // Decrease by 1.5, but since we're inverting, we use the reciprocal
+                    staffCounts['LM'] = 0; // Remove Lead Mod below 25k members
+                    break;
+                case '50k':
+                    membershipFactor = 1; // Base case
+                    break;
+                case '75k':
+                    membershipFactor = 1.5;
+                    break;
+                case '100k':
+                    membershipFactor = 2;
+                    break;
+                default:
+                    membershipFactor = 1; // Default to base case if something goes wrong
+            }
 
-      // Adjust hours based on engagement level
-      let engagement_factor = engagement === 'low' ? 1 : (engagement === 'medium' ? 1 : .75);
+            Object.keys(rates).forEach(role => {
+                weeklyCost += rates[role] * staffCounts[role] * 20 * membershipFactor; // 20 hours per week for simplicity
+            });
 
-      let total_hours_factor = membership_factor * engagement_factor;
+            const monthlyStaffCost = weeklyCost * 4; // Assuming 4 weeks per month
+            const contentPackageCost = packageCosts[contentPackage];
+            const totalCost = monthlyStaffCost + contentPackageCost;
 
-      // Calculate weekly cost based on adjusted hours
-      let weeklyCost = Object.keys(rates).reduce((total, role) => {
-        return total + (rates[role] * base_hours_50k[role] * total_hours_factor);
-      }, 0);
-
-      // Assuming 4 weeks per month for the monthly calculation
-      let monthlyCost = weeklyCost * 4;
-
-      // Calculate content package cost separately
-      const packageCosts = {
-        'basic': 25000,
-        'advanced': 50000,
-        'top-notch': 75000
-      };
-      const contentPackage = document.getElementById('contentPackage').value;
-      const contentPackageCost = packageCosts[contentPackage];
-
-      // Adjust staff numbers based on membership_factor only (engagement doesn't affect staff count)
-      let adjusted_staff = {};
-      Object.keys(base_staff_50k).forEach(role => {
-        adjusted_staff[role] = Math.round(base_staff_50k[role] * membership_factor);
-      });
-
-      // Update the UI with calculated values
-      document.getElementById('weeklyCost').innerText = `Weekly Cost: $${weeklyCost.toFixed(2)}`;
-      document.getElementById('monthlyCost').innerText = `Monthly Cost: $${monthlyCost.toFixed(2)}`;
-      document.getElementById('packageCost').innerText = `Content Package Cost: $${contentPackageCost.toFixed(2)}`;
-      document.getElementById('adjustedStaff').innerText = `Adjusted Staff: ${JSON.stringify(adjusted_staff, null, 2)}`;
-    }
-  </script>
+            document.getElementById('weeklyStaffCost').innerText = `Weekly Staffing Cost: $${weeklyCost.toFixed(2)}`;
+            document.getElementById('monthlyStaffCost').innerText = `Total Monthly Staffing Cost: $${monthlyStaffCost.toFixed(2)}`;
+            document.getElementById('contentPackageCost').innerText = `Content Package Cost: $${contentPackageCost.toFixed(2)}`;
+            document.getElementById('totalCost').innerText = `Subtotal: $${totalCost.toFixed(2)}`;
+        }
+    </script>
 </head>
-
 <body>
-  <h1>Server Cost and Staff Calculator</h1>
-  <div>
-    <label for="members">Server Members:</label>
-    <select id="members" required>
-      <option value="25000">25k</option>
-      <option value="50000" selected>50k</option>
-      <option value="75000">75k</option>
-      <option value="100000">100k</option>
-    </select>
-  </div>
-  <div>
-    <label for="engagement">Engagement Level:</label>
-    <select id="engagement" required>
-      <option value="low">Low</option>
-      <option value="medium">Medium</option>
-      <option value="high">High</option>
-    </select>
-  </div>
-  <div>
-    <label for="contentPackage">Content Package:</label>
-    <select id="contentPackage" required>
-      <option value="basic">None - $0</option>
-      <option value="basic">Basic - $25,000</option>
-      <option value="advanced">Advanced - $50,000</option>
-      <option value="top-notch">Top-Notch - $75,000</option>
-    </select>
-  </div>
-  <button onclick="calculateCostsAndStaff()">Calculate</button>
-  <div>
-    <p id="weeklyCost">Weekly Cost: $0.00</p>
-    <p id="monthlyCost">Monthly Cost: $0.00</p>
-    <p id="packageCost">Content Package Cost: $0.00</p>
-    <pre id="adjustedStaff">Adjusted Staff: {}</pre>
-  </div>
+    <h1>Server Cost Calculator</h1>
+    <div>
+        <label for="serverSize">Server Size:</label>
+        <select id="serverSize" required>
+            <option value="25k">25k Members</option>
+            <option value="50k">50k Members</option>
+            <option value="75k">75k Members</option>
+            <option value="100k">100k Members</option>
+        </select>
+    </div>
+    <div>
+        <label for="contentPackage">Content Package:</label>
+        <select id="contentPackage" required>
+            <option value="none">$0 - No Package</option>
+            <option value="basic">$25,000 - Basic Package</option>
+            <option value="advanced">$50,000 - Advanced Package</option>
+            <option value="top-notch">$75,000 - Top-Notch Package</option>
+        </select>
+    </div>
+    <button onclick="calculateCosts()">Calculate</button>
+    <div>
+        <p id="weeklyStaffCost">Weekly Staffing Cost: $0.00</p>
+        <p id="monthlyStaffCost">Total Monthly Staffing Cost: $0.00</p>
+        <p id="contentPackageCost">Content Package Cost: $0.00</p>
+        <p id="totalCost">Subtotal: $0.00</p>
+    </div>
 </body>
-
 </html>
