@@ -52,7 +52,7 @@
       }
 
       // Adjust hours based on engagement level
-      let engagement_factor = engagement === 'low' ? 1 : (engagement === 'medium' ? 1.5 : 2.5);
+      let engagement_factor = engagement === 'low' ? 1 : (engagement === 'medium' ? 1 : .75);
 
       let total_hours_factor = membership_factor * engagement_factor;
 
