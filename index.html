@@ -4,66 +4,76 @@
     <meta charset="UTF-8">
     <title>Server Cost Calculator</title>
     <script>
-        function calculateCosts() {
-            // Hourly rates
-            const rates = {
-                'CM': 170,
-                'JM': 80,
-                'LM': 40,
-                'Junior/International Moderators': 30
-            };
+function calculateCosts() {
+    // Hourly rates
+    const rates = {
+        'CM': 170,
+        'JM': 80,
+        'LM': 40,
+        'Junior/International Moderators': 30
+    };
 
-            // Staff counts for each role
-            const staffCounts = {
-                'CM': 1,
-                'JM': 1,
-                'LM': 1,
-                'Junior/International Moderators': 6 // Assumes 6 Junior/International Moderators
-            };
+    // Staff counts for each role
+    const staffCounts = {
+        'CM': 1,
+        'JM': 1,
+        'LM': 1,
+        'Junior/International Moderators': 6 // Assumes 6 Junior/International Moderators
+    };
 
-            // Content package costs
-            const packageCosts = {
-                'none': 0,
-                'basic': 25000,
-                'advanced': 50000,
-                'top-notch': 75000
-            };
+    // Content package costs
+    const packageCosts = {
+        'none': 0,
+        'basic': 25000,
+        'advanced': 50000,
+        'top-notch': 75000
+    };
 
-            const serverSize = document.getElementById('serverSize').value;
-            const contentPackage = document.getElementById('contentPackage').value;
+    const serverSize = document.getElementById('serverSize').value;
+    const contentPackage = document.getElementById('contentPackage').value;
+    const engagementLevel = document.getElementById('engagement').value; // Get engagement level
 
-            let membershipFactor, weeklyCost = 0;
-            switch (serverSize) {
-                case '25k':
-                    membershipFactor = 0.6667; // Decrease by 1.5, but since we're inverting, we use the reciprocal
-                    staffCounts['LM'] = 0; // Remove Lead Mod below 25k members
-                    break;
-                case '50k':
-                    membershipFactor = 1; // Base case
-                    break;
-                case '75k':
-                    membershipFactor = 1.5;
-                    break;
-                case '100k':
-                    membershipFactor = 2;
-                    break;
-                default:
-                    membershipFactor = 1; // Default to base case if something goes wrong
-            }
+    let membershipFactor, weeklyCost = 0;
+    switch (serverSize) {
+        case '25k':
+            membershipFactor = 0.6667; // Decrease by 1.5, but since we're inverting, we use the reciprocal
+            staffCounts['LM'] = 0; // Remove Lead Mod below 25k members
+            break;
+        case '50k':
+            membershipFactor = 1; // Base case
+            break;
+        case '75k':
+            membershipFactor = 1.5;
+            break;
+        case '100k':
+            membershipFactor = 2;
+            break;
+        default:
+            membershipFactor = 1; // Default to base case if something goes wrong
+    }
 
-            Object.keys(rates).forEach(role => {
-                weeklyCost += rates[role] * staffCounts[role] * 20 * membershipFactor; // 20 hours per week for simplicity
-            });
+    // Engagement level adjustments
+    let engagementFactor = 1; // Default for low engagement
+    if (engagementLevel === 'medium') {
+        engagementFactor = 1.2; // Adjust this factor as necessary for medium engagement
+    } else if (engagementLevel === 'high') {
+        engagementFactor = 1.5; // Adjust this factor as necessary for high engagement
+    }
 
-            const monthlyStaffCost = weeklyCost * 4; // Assuming 4 weeks per month
-            const contentPackageCost = packageCosts[contentPackage];
-            const totalCost = monthlyStaffCost + contentPackageCost;
+    Object.keys(rates).forEach(role => {
+        weeklyCost += rates[role] * staffCounts[role] * 20 * membershipFactor * engagementFactor; // Apply engagement factor here
+    });
 
-            document.getElementById('weeklyStaffCost').innerText = `Weekly Staffing Cost: $${weeklyCost.toFixed(2)}`;
-            document.getElementById('monthlyStaffCost').innerText = `Total Monthly Staffing Cost: $${monthlyStaffCost.toFixed(2)}`;
-            document.getElementById('contentPackageCost').innerText = `Content Package Cost: $${contentPackageCost.toFixed(2)}`;
-            document.getElementById('totalCost').innerText = `Subtotal: $${totalCost.toFixed(2)}`;
-        }
+    const monthlyStaffCost = weeklyCost * 4; // Assuming 4 weeks per month
+    const contentPackageCost = packageCosts[contentPackage];
+    const totalCost = monthlyStaffCost + contentPackageCost;
+
+    document.getElementById('weeklyStaffCost').innerText = `Weekly Staffing Cost: $${weeklyCost.toFixed(2)}`;
+    document.getElementById('monthlyStaffCost').innerText = `Total Monthly Staffing Cost: $${monthlyStaffCost.toFixed(2)}`;
+    document.getElementById('contentPackageCost').innerText = `Content Package Cost: $${contentPackageCost.toFixed(2)}`;
+    document.getElementById('totalCost').innerText = `Subtotal: $${totalCost.toFixed(2)}`;
+}
+
     </script>
 </head>
 <body>
