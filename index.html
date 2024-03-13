@@ -3,201 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <title>Server Cost Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #edf2f7;
+            color: #333;
+            padding: 40px 0;
+            margin: 0;
+            text-align: center;
+        }
 
-<style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #edf2f7;
-        color: #333;
-        padding: 40px 0;
-        margin: 0;
-        text-align: center;
-    }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
 
-    .container {
-        width: 100%;
-        max-width: 480px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 20px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e2e8f0;
-    }
+        h1 {
+            color: #4a5568;
+            margin-bottom: 24px;
+        }
 
-    h1 {
-        color: #4a5568;
-        margin-bottom: 24px;
-    }
+        label {
+            display: block;
+            margin: 20px auto 10px;
+            font-size: 18px;
+            color: #4a5568;
+        }
 
-    label {
-        display: block;
-        margin: 20px auto 10px;
-        font-size: 18px;
-        color: #4a5568;
-    }
-
-    select,
-    button {
-        width: calc(100% - 40px);
-        padding: 12px 20px;
-        margin: 10px auto;
-        border-radius: 10px;
-        border: 2px solid #cbd5e0;
-        background: #edf2f7;
-        color: #4a5568;
-        font-size: 16px;
-        outline: none;
-        transition: all 0.3s ease;
-    }
-
-    select:hover,
-    button:hover {
-        border-color: #a0aec0;
-    }
-
-    button {
-        background-color: #2b6cb0;
-        color: #ffffff;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    button:hover {
-        background-color: #2c5282;
-    }
-
-    .results p {
-        font-size: 16px;
-        text-align: left;
-        margin: 10px 20px;
-        padding: 12px 20px;
-        background-color: #f7fafc;
-        border-radius: 10px;
-        border-left: 5px solid #2b6cb0;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    @media (max-width: 768px) {
         select, button {
-            width: calc(100% - 20px);
-        }
-    }
-</style>
-<script>
-    function calculateCosts() {
-        const rates = {
-            'CM': 170,
-            'JM': 80,
-            'LM': 40,
-            'Junior/International Moderators': 30
-        };
-
-        let staffCounts = {
-            'CM': 1,
-            'JM': 1,
-            'LM': 1,
-            'Junior/International Moderators': 6 // Base count for Junior/International Moderators
-        };
-
-        const packageCosts = {
-            'none': 0,
-            'basic': 25000,
-            'advanced': 50000,
-            'top-notch': 75000
-        };
-
-        const serverSize = document.getElementById('serverSize').value;
-        const contentPackage = document.getElementById('contentPackage').value;
-        const engagementLevel = document.getElementById('engagement').value;
-
-        // Adjust staff counts based on server size
-        if (serverSize === '75k') {
-            staffCounts['Junior/International Moderators'] += 2; // Add 2 for 75k members
-        } else if (serverSize === '100k') {
-            staffCounts['Junior/International Moderators'] += 4; // Add 4 for 100k members
+            width: calc(100% - 40px);
+            padding: 12px 20px;
+            margin: 10px auto;
+            border-radius: 10px;
+            border: 2px solid #cbd5e0;
+            background: #edf2f7;
+            color: #4a5568;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
         }
 
-        // Adjust staff counts based on engagement level
-        if (engagementLevel === 'medium') {
-            staffCounts['Junior/International Moderators'] += 2; // Additional 2 for medium engagement
-        } else if (engagementLevel === 'high') {
-            staffCounts['Junior/International Moderators'] += 4; // Additional 4 for high engagement
+        select:hover, button:hover {
+            border-color: #a0aec0;
         }
 
-        let membershipFactor;
-        switch (serverSize) {
-            case '25k':
-                membershipFactor = 0.6667; // Decrease by 1.5
-                staffCounts['LM'] = 0; // Remove Lead Mod below 25k members
-                break;
-            case '50k':
-                membershipFactor = 1; // Base case
-                break;
-            case '75k':
-                membershipFactor = 1.5;
-                break;
-            case '100k':
-                membershipFactor = 2;
-                break;
-            default:
-                membershipFactor = 1; // Default to base case if something goes wrong
+        button {
+            background-color: #2b6cb0;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        let weeklyCost = 0;
-        Object.keys(rates).forEach(role => {
-            let baseHours = 20; // Assuming 20 hours for simplicity
-            weeklyCost += rates[role] * staffCounts[role] * baseHours * membershipFactor; // Apply membership factor
-        });
+        button:hover {
+            background-color: #2c5282;
+        }
 
-        const monthlyStaffCost = weeklyCost * 4; // Assuming 4 weeks per month
-        const contentPackageCost = packageCosts[contentPackage];
-        const totalCost = monthlyStaffCost + contentPackageCost;
+        .results p {
+            font-size: 16px;
+            text-align: left;
+            margin: 10px 20px;
+            padding: 12px 20px;
+            background-color: #f7fafc;
+            border-radius: 10px;
+            border-left: 5px solid #2b6cb0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
 
-        document.getElementById('weeklyStaffCost').innerText = `Weekly Staffing Cost: $${weeklyCost.toFixed(2)}`;
-        document.getElementById('monthlyStaffCost').innerText = `Total Monthly Staffing Cost: $${monthlyStaffCost.toFixed(2)}`;
-        document.getElementById('contentPackageCost').innerText = `Content Package Cost: $${contentPackageCost.toFixed(2)}`;
-        document.getElementById('totalCost').innerText = `Subtotal: $${totalCost.toFixed(2)}`;
-        document.getElementById('staffAllocation').innerText = `Staff Allocation: CM: ${staffCounts['CM']}, JM: ${staffCounts['JM']}, LM: ${staffCounts['LM']}, Junior/International Moderators: ${staffCounts['Junior/International Moderators']}`;
-    }
-</script>
+        @media (max-width: 768px) {
+            select, button {
+                width: calc(100% - 20px);
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Server Cost Calculator</h1>
-    <div>
-        <label for="serverSize">Server Size:</label>
-        <select id="serverSize" required>
-            <option value="25k">25k Members</option>
-            <option value="50k">50k Members</option>
-            <option value="75k">75k Members</option>
-            <option value="100k">100k Members</option>
-        </select>
+    <div class="container">
+        <h1>Server Cost Calculator</h1>
+        <div>
+            <label for="serverSize">Server Size:</label>
+            <select id="serverSize" required>
+                <option value="25k">25k Members</option>
+                <option value="50k">50k Members</option>
+                <option value="75k">75k Members</option>
+                <option value="100k">100k Members</option>
+            </select>
+        </div>
+        <div>
+            <label for="engagement">Engagement Level:</label>
+            <select id="engagement" required>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+        </div>
+        <div>
+            <label for="contentPackage">Content Package:</label>
+            <select id="contentPackage" required>
+                <option value="none">$0 - No Package</option>
+                <option value="basic">$25,000 - Basic Package</option>
+                <option value="advanced">$50,000 - Advanced Package</option>
+                <option value="top-notch">$75,000 - Top-Notch Package</option>
+            </select>
+        </div>
+        <button onclick="calculateCosts()">Calculate</button>
+        <div class="results">
+            <p id="weeklyStaffCost">Weekly Staffing Cost: $0.00</p>
+            <p id="monthlyStaffCost">Total Monthly Staffing Cost: $0.00</p>
+            <p id="contentPackageCost">Content Package Cost: $0.00</p>
+            <p id="totalCost">Subtotal: $0.00</p>
+            <p id="staffAllocation">Staff Allocation: </p>
+        </div>
     </div>
-    <div>
-        <label for="engagement">Engagement Level:</label>
-        <select id="engagement" required>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-        </select>
-    </div>
-    <div>
-        <label for="contentPackage">Content Package:</label>
-        <select id="contentPackage" required>
-            <option value="none">$0 - No Package</option>
-            <option value="basic">$25,000 - Basic Package</option>
-            <option value="advanced">$50,000 - Advanced Package</option>
-            <option value="top-notch">$75,000 - Top-Notch Package</option>
-        </select>
-    </div>
-    <button onclick="calculateCosts()">Calculate</button>
-    <div>
-        <p id="weeklyStaffCost">Weekly Staffing Cost: $0.00</p>
-        <p id="monthlyStaffCost">Total Monthly Staffing Cost: $0.00</p>
-        <p id="contentPackageCost">Content Package Cost: $0.00</p>
-        <p id="totalCost">Subtotal: $0.00</p>
-        <p id="staffAllocation">Staff Allocation: </p>
-    </div>
+
+    <script>
+        function calculateCosts() {
+            const rates = {
+                'CM': 170,
+                'JM': 80,
+                'LM': 40,
+                'Junior/International Moderators': 30
+            };
+
+            let staffCounts = {
+                'CM': 1,
+                'JM': 1,
+                'LM': 1,
+                'Junior/International Moderators': 6
+            };
+
+            const packageCosts = {
+                'none': 0,
+                'basic': 25000,
+                'advanced': 50000,
+                'top-notch': 75000
+            };
+
+            const serverSize = document.getElementById('serverSize').value;
+            const contentPackage = document.getElementById('contentPackage').value;
+            const engagementLevel = document.getElementById('engagement').value;
+
+            if (serverSize === '75k') {
+                staffCounts['Junior/International Moderators'] += 2;
+            } else if (serverSize === '100k') {
+                staffCounts['Junior/International Moderators'] += 4;
+            }
+
+            if (engagementLevel === 'medium') {
+                staffCounts['Junior/International Moderators'] += 2;
+            } else if (engagementLevel === 'high') {
+                staffCounts['Junior/International Moderators'] += 4;
+            }
+
+            let membershipFactor;
+            switch (serverSize) {
+                case '25k':
+                    membershipFactor = 0.6667;
+                    staffCounts['LM'] = 0;
+                    break;
+                case '50k':
+                    membershipFactor = 1;
+                    break;
+                case '75k':
+                    membershipFactor = 1.5;
+                    break;
+                case '100k':
+                    membershipFactor = 2;
+                    break;
+                default:
+                    membershipFactor = 1;
+            }
+
+            let weeklyCost = 0;
+            Object.keys(rates).forEach(role => {
+                let baseHours = 20;
+                weeklyCost += rates[role] * staffCounts[role] * baseHours * membershipFactor;
+            });
+
+            const monthlyStaffCost = weeklyCost * 4;
+            const contentPackageCost = packageCosts[contentPackage];
+            const totalCost = monthlyStaffCost + contentPackageCost;
+
+            document.getElementById('weeklyStaffCost').innerText = `Weekly Staffing Cost: $${weeklyCost.toFixed(2)}`;
+            document.getElementById('monthlyStaffCost').innerText = `Total Monthly Staffing Cost: $${monthlyStaffCost.toFixed(2)}`;
+            document.getElementById('contentPackageCost').innerText = `Content Package Cost: $${contentPackageCost.toFixed(2)}`;
+            document.getElementById('totalCost').innerText = `Subtotal: $${totalCost.toFixed(2)}`;
+            document.getElementById('staffAllocation').innerText = `Staff Allocation: CM: ${staffCounts['CM']}, JM: ${staffCounts['JM']}, LM: ${staffCounts['LM']}, Junior/International Moderators: ${staffCounts['Junior/International Moderators']}`;
+        }
+    </script>
 </body>
 </html>
